@@ -26,23 +26,21 @@ def plot_trigonometry(func_type, A, B, C, D):
     if func_type == 'Sinus':
         y_original = np.sin(x)
         y_transformed = A * np.sin(B * (x + C)) + D
-        formula_str = r"y = A \sin(B(x + C)) + D"
     elif func_type == 'Kosinus':
         y_original = np.cos(x)
         y_transformed = A * np.cos(B * (x + C)) + D
-        formula_str = r"y = A \cos(B(x + C)) + D"
     
     # --- Plotting dengan Matplotlib ---
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # Plot fungsi standar (Referensi)
-    ax.plot(x, y_original, 'k--', alpha=0.5, label=f"y = {func_type.lower()}(x)")
+    ax.plot(x, y_original, 'k--', alpha=0.5, label=f"y = {func_type.lower()}(x) Standar")
 
     # Plot fungsi hasil transformasi
     ax.plot(x, y_transformed, 'r-', linewidth=3, label="Hasil Transformasi")
     
     # Garis Tengah (D)
-    ax.axhline(D, color='blue', linestyle='-.', alpha=0.7, label=f"Garis Tengah (y={D})")
+    ax.axhline(D, color='blue', linestyle='-.', alpha=0.7, label=f"Garis Tengah (y={D:.1f})")
     
     # Sumbu koordinat
     ax.axhline(0, color='gray', linewidth=0.5)
@@ -65,14 +63,14 @@ def plot_trigonometry(func_type, A, B, C, D):
     ax.set_ylabel('Nilai y')
     
     st.pyplot(fig)
-    return formula_str
+    return
 
 # --- Sidebar (Input Kontrol) ---
 
 st.sidebar.header("Kontrol Fungsi")
 func_type = st.sidebar.selectbox(
     "1. Pilih Fungsi Dasar:",
-    ('Sinus', 'Kosinus') # Tangen dihilangkan untuk mempermudah batas sumbu y
+    ('Sinus', 'Kosinus')
 )
 st.sidebar.markdown("---")
 
@@ -111,7 +109,7 @@ with col1:
     st.subheader("Visualisasi Grafik Fungsi")
     
     # Panggil fungsi plotting
-    final_formula_base = plot_trigonometry(func_type, A, B, C, D)
+    plot_trigonometry(func_type, A, B, C, D)
     
 
 with col2:
@@ -134,26 +132,24 @@ with col2:
     st.markdown("---")
     st.subheader("Rumus yang Digambar")
     
-    # Menampilkan rumus yang spesifik dengan nilai aktual
-    C_signed = "+" if C >= 0 else "-"
-    C_val = abs(C)
-    D_signed = "+" if D >= 0 else "-"
-    D_val = abs(D)
+    # Membangun string LaTeX yang spesifik dan aman
+    func = r"\sin" if func_type == 'Sinus' else r"\cos"
+    
+    # Menyederhanakan tampilan jika C atau D nol
+    term_C = ""
+    if abs(C) > 0.01:
+        term_C = f" + {C:.2f}"
+    
+    term_D = ""
+    if abs(D) > 0.01:
+        term_D = f" + {D:.2f}"
+    elif abs(D) < 0.01 and D != 0:
+        # Menangani jika D sangat kecil mendekati nol
+        term_D = "" 
 
-    # Menggunakan f-string di luar st.latex untuk membangun string LaTeX yang rapi
-    if func_type == 'Sinus':
-        final_formula = f"y = {A:.1f} \sin({B:.1f} x {C_signed} {B:.1f} \cdot {C_val:.2f}) {D_signed} {D_val:.1f}"
-    else:
-        final_formula = f"y = {A:.1f} \cos({B:.1f} x {C_signed} {B:.1f} \cdot {C_val:.2f}) {D_signed} {D_val:.1f}"
-
-    # Jika B=1, hilangkan B dari rumus
-    if B == 1.0:
-        if func_type == 'Sinus':
-            final_formula = f"y = {A:.1f} \sin(x {C_signed} {C_val:.2f}) {D_signed} {D_val:.1f}"
-        else:
-            final_formula = f"y = {A:.1f} \cos(x {C_signed} {C_val:.2f}) {D_signed} {D_val:.1f}"
-
-    st.latex(final_formula)
+    rumus = f"y = {A:.2f} {func}\\left({B:.2f} (x {term_C})\\right) {term_D}"
+    
+    st.latex(rumus)
 
 
 # --- Penjelasan Konsep (Bawah) ---
@@ -162,19 +158,32 @@ st.header("💡 Konsep Dasar Transformasi")
 
 st.markdown("""
 Setiap parameter pada fungsi $y = A \cdot f(B(x + C)) + D$ memiliki peran spesifik:
-
-1.  **A (Amplitudo):** Mengontrol tinggi gelombang.
-    * Jika $|A| > 1$, grafik **diregangkan** vertikal.
-    * Jika $|A| < 1$, grafik **ditekan** vertikal.
-    * Jika $A < 0$, grafik **direfleksikan** terhadap garis tengah ($y=D$).
 """)
 
+st.subheader("1. Amplitudo ($A$)")
 st.markdown(r"""
-2.  **B (Faktor Periode):** Mengontrol lebar gelombang. Periode adalah panjang satu siklus.
-    * Periode dihitung dengan $\frac{2\pi}{|B|}$.
-    * Jika $B > 1$, periode **memendek** (gelombang rapat).
-    * Jika $B < 1$, periode **memanjang** (gelombang renggang).
+Mengontrol **tinggi** gelombang. Amplitudo adalah jarak vertikal maksimum dari garis tengah.
+* Jika $|A| > 1$, grafik **diregangkan** vertikal.
+* Jika $A < 0$, grafik **direfleksikan** terhadap garis tengah.
 """)
+
+st.subheader("2. Faktor Periode ($B$)")
+st.markdown(r"""
+Mengontrol **lebar** gelombang. Periode adalah panjang satu siklus lengkap.
+* Periode dihitung dengan $\frac{2\pi}{|B|}$.
+* Jika $B > 1$, periode **memendek** (gelombang rapat).
+* Jika $B < 1$, periode **memanjang** (gelombang renggang).
+""")
+
+st.subheader("3. Pergeseran Fase ($C$)")
 st.markdown("""
-3.  **C (Pergeseran Fase):** Mengontrol pergeseran horizontal (kiri-kanan).
-    *
+Mengontrol pergeseran **horizontal** (kiri-kanan).
+* $y = f(x+C)$: bergeser **ke KIRI** sejauh $C$ (jika $C>0$).
+* $y = f(x-C)$: bergeser **ke KANAN** sejauh $C$ (jika $C>0$ dimasukkan sebagai $-C$).
+""")
+
+st.subheader("4. Pergeseran Vertikal ($D$)")
+st.markdown("""
+Mengontrol pergeseran **garis tengah** (atas-bawah).
+* Garis tengah baru adalah $y = D$.
+""")
