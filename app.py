@@ -239,8 +239,9 @@ with col_plot:
     plot_transformation(original_points, transformed_points, transformation_name, transformation_type)
     
 
-[Image of geometric transformation translation rotation reflection dilation on a Cartesian plane]
+
 with col_res:
+    
     st.subheader("📚 Hasil & Rumus")
     
     st.markdown("**Koordinat Awal:**")
