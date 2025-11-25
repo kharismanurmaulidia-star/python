@@ -240,8 +240,6 @@ with col_plot:
     
 
 [Image of geometric transformation translation rotation reflection dilation on a Cartesian plane]
-
-
 with col_res:
     st.subheader("📚 Hasil & Rumus")
     
